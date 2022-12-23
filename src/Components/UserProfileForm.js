@@ -1,84 +1,49 @@
-import React, { useRef, useContext, useEffect, useCallback } from 'react';
+import React, { useRef, useContext, useEffect } from "react";
 
-import classes from './UserProfileForm.module.css';
-import loginContext from '../Store/LoginContext';
-
+import classes from "./UserProfileForm.module.css";
+import profileContext from "../Store/ProfileContext";
 
 const UserProfileForm = () => {
-  const loginCtx = useContext(loginContext);
+  const profileCtx = useContext(profileContext);
   const nameRef = useRef();
-  const imageRef = useRef();
+  const photoRef = useRef();
 
   const profileSubmitHandler = async (event) => {
     event.preventDefault();
-
-    if (loginCtx.isLoggedIn) {
-      try {
-        const res = await fetch(
-          'https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds',
-          {
-            method: 'POST',
-            body: JSON.stringify({
-              idToken: localStorage.getItem('idToken'),
-              displayName: nameRef.current.value,
-              photoUrl: imageRef.current.value,
-              returnSecureToken: true,
-            }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        const data = await res.json();
-
-        if (res.ok) {
-          // console.log(data);
-        } else {
-          throw data.error;
-        }
-      } catch (err) {
-        console.log(err.message);
-      }
-    }
-  };
-
-  const getUserProfile = useCallback (async () => {
     try {
-      // console.log('called');
       const res = await fetch(
-        'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds',
+        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds",
         {
-          method: 'POST',
+          method: "POST",
           body: JSON.stringify({
-            idToken: localStorage.getItem('idToken'),
+            idToken: localStorage.getItem("idToken"),
+            displayName: nameRef.current.value,
+            photoUrl: photoRef.current.value,
+            returnSecureToken: true,
           }),
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
 
       const data = await res.json();
+
       if (res.ok) {
-        nameRef.current.value = data.users[0].displayName;
-        imageRef.current.value = data.users[0].photoUrl;
+        // console.log(data);
+        profileCtx.update();
       } else {
         throw data.error;
       }
     } catch (err) {
       console.log(err.message);
     }
-  },[]);
-
-
-  const { isLoggedIn } = loginCtx;
+  };
 
   useEffect(() => {
-    if (isLoggedIn) {
-      getUserProfile();
-    }
-  }, [getUserProfile, isLoggedIn]);
+    nameRef.current.value = profileCtx.name;
+    photoRef.current.value = profileCtx.photo;
+  });
 
   return (
     <form className={classes.form} onSubmit={profileSubmitHandler}>
@@ -88,11 +53,11 @@ const UserProfileForm = () => {
       </div>
       <div className={classes.formBody}>
         <label>Full Name:</label>
-        <input type='text' ref={nameRef} />
+        <input type="text" ref={nameRef} />
         <label>Profile Photo URL:</label>
-        <input type='text' ref={imageRef} />
+        <input type="text" ref={photoRef} />
         <div className={classes.button}>
-          <button type='submit'>Update</button>
+          <button type="submit">Update</button>
         </div>
       </div>
     </form>

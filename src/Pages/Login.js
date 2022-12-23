@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import classes from './Login.module.css';
 import loginContext from '../Store/LoginContext';
+import LoginMessage from '../Components/LoginMessage';
 
 const Login = () => {
   const [haveAccount, setHaveAccount] = useState(true);
@@ -63,45 +64,33 @@ const Login = () => {
     }
   };
 
-  if(loginCtx.isLoggedIn) {
-    return (
-      <div className={classes.mainProfile}>
-        <span className={classes.welcome}>
-          Welcome to Expense Tracker...!!!
-        </span>
-        <span className={classes.profile}>
-          <span>Your profile is incomplete.</span>
-          <Link to='/profile' >
-            <b> Complete now</b>
-          </Link>
-        </span>
-      </div>
-    );
+  if (loginCtx.isLoggedIn) {
+    return <LoginMessage />
   }
 
   return (
-      <div className={classes.mainDiv}>
-        <form className={classes.form} onSubmit={loginFormHandler}>
-          <input type='email' placeholder='email' ref={emailRef} />
-          <input type='password' placeholder='password' ref={passwordRef} />
-          {!haveAccount && (
-            <input
-              type='password'
-              placeholder='confirm password'
-              ref={confirmPasswordRef}
-            />
-          )}
-          <button type='submit'>
-            {haveAccount ? 'Login' : 'Create Account'}
-          </button>
-          {haveAccount ? <Link to='/'>Forgot Password</Link> : ''}
-        </form>
-        <div className={classes.login} onClick={accountHandler}>
-          {haveAccount
-            ? `Don't have an account? Sign Up`
-            : `Have an account? Sign In`}
-        </div>
+    <div className={classes.mainDiv}>
+      <form className={classes.form} onSubmit={loginFormHandler}>
+        <input type='email' placeholder='email' ref={emailRef} />
+        <input type='password' placeholder='password' ref={passwordRef} />
+        {!haveAccount && (
+          <input
+            type='password'
+            placeholder='confirm password'
+            ref={confirmPasswordRef}
+          />
+        )}
+        <button type='submit'>
+          {haveAccount ? 'Login' : 'Create Account'}
+        </button>
+        {haveAccount ? <Link to='/'>Forgot Password</Link> : ''}
+      </form>
+      <div className={classes.login} onClick={accountHandler}>
+        {haveAccount
+          ? `Don't have an account? Sign Up`
+          : `Have an account? Sign In`}
       </div>
+    </div>
   );
 };
 

@@ -10,6 +10,7 @@ import UserProfile from './Pages/UserProfile';
 import loginContext from './Store/LoginContext';
 import About from './Pages/About'
 import Product from './Pages/Product';
+import { ProfileContextProvider } from './Store/ProfileContext';
 function App() {
   const loginCtx = useContext(loginContext);
 
@@ -29,7 +30,14 @@ function App() {
         <Route path='/about' element={<About />} />
 
         {loginCtx.isLoggedIn ? (
-          <Route path='/profile' element={<UserProfile />} />
+          <Route
+            path='/profile'
+            element={
+              <ProfileContextProvider>
+                <UserProfile />
+              </ProfileContextProvider>
+            }
+          />
         ) : (
           <Route path='/profile' element={<Navigate replace to='/login' />} />
         )}
