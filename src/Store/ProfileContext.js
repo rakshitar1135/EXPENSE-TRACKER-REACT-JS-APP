@@ -16,7 +16,7 @@ export const ProfileContextProvider = (props) => {
     try {
       // console.log('called');
       const res = await fetch(
-        'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds',
+        'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDfn9W04IeYuEgFhPbEMU1X07J32SmVnT0',
         {
           method: 'POST',
           body: JSON.stringify({

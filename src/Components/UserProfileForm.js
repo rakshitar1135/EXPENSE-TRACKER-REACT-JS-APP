@@ -1,28 +1,30 @@
-import React, { useRef, useContext, useEffect } from "react";
+import React, { useRef, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import classes from "./UserProfileForm.module.css";
-import profileContext from "../Store/ProfileContext";
+import classes from './UserProfileForm.module.css';
+import profileContext from '../Store/ProfileContext';
 
 const UserProfileForm = () => {
   const profileCtx = useContext(profileContext);
   const nameRef = useRef();
   const photoRef = useRef();
+  const naviagte = useNavigate();
 
   const profileSubmitHandler = async (event) => {
     event.preventDefault();
     try {
       const res = await fetch(
-        "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds",
+        'https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds',
         {
-          method: "POST",
+          method: 'POST',
           body: JSON.stringify({
-            idToken: localStorage.getItem("idToken"),
+            idToken: localStorage.getItem('idToken'),
             displayName: nameRef.current.value,
             photoUrl: photoRef.current.value,
             returnSecureToken: true,
           }),
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -30,7 +32,7 @@ const UserProfileForm = () => {
       const data = await res.json();
 
       if (res.ok) {
-        // console.log(data);
+        naviagte('/home');
         profileCtx.update();
       } else {
         throw data.error;
@@ -43,7 +45,7 @@ const UserProfileForm = () => {
   useEffect(() => {
     nameRef.current.value = profileCtx.name;
     photoRef.current.value = profileCtx.photo;
-  });
+  })
 
   return (
     <form className={classes.form} onSubmit={profileSubmitHandler}>
@@ -53,11 +55,11 @@ const UserProfileForm = () => {
       </div>
       <div className={classes.formBody}>
         <label>Full Name:</label>
-        <input type="text" ref={nameRef} />
+        <input type='text' ref={nameRef} />
         <label>Profile Photo URL:</label>
-        <input type="text" ref={photoRef} />
+        <input type='text' ref={photoRef} />
         <div className={classes.button}>
-          <button type="submit">Update</button>
+          <button type='submit'>Update</button>
         </div>
       </div>
     </form>

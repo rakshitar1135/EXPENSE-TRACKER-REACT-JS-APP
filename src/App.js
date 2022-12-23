@@ -1,7 +1,8 @@
 import React from 'react';
+import { useContext } from 'react';
 
 import { Routes, Route,Navigate} from 'react-router-dom';
-import { useContext } from 'react';
+
 import './App.css';
 import MainNavigation from './Components/MainNavigation';
 import Login from './Pages/Login';
@@ -9,8 +10,14 @@ import Home from './Pages/Home';
 import UserProfile from './Pages/UserProfile';
 import loginContext from './Store/LoginContext';
 import About from './Pages/About'
-import Product from './Pages/Product';
+import Expenses from './Pages/Expenses';
 import { ProfileContextProvider } from './Store/ProfileContext';
+
+import ForgotPassword from './Components/ForgotPassword';
+
+
+
+
 function App() {
   const loginCtx = useContext(loginContext);
 
@@ -22,9 +29,9 @@ function App() {
         <Route path='/home' element={<Home />} />
 
         {loginCtx.isLoggedIn ? (
-          <Route path='/product' element={<Product />} />
+          <Route path='/expenses' element={<Expenses />} />
         ) : (
-          <Route path='/product' element={<Navigate replace to='/login' />} />
+          <Route path='/expenses' element={<Navigate replace to='/login' />} />
         )}
 
         <Route path='/about' element={<About />} />
@@ -43,10 +50,12 @@ function App() {
         )}
 
         <Route path='/login' element={<Login />} />
+        <Route path='/resetpassword' element={<ForgotPassword />} />
       </Routes>
     </React.Fragment>
   );
 }
 
 export default App;
+
 

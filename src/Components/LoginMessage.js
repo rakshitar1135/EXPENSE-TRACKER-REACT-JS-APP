@@ -1,20 +1,14 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 import classes from './LoginMessage.module.css';
-import loginContext from '../Store/LoginContext';
 
 const LoginMessage = () => {
-  const loginCtx = useContext(loginContext);
-
-  const logoutHandler = () => {
-    loginCtx.logout();
-  };
 
   const verifyEmailHandler = async () => {
     try {
       const res = await fetch(
-        'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds',
+        'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyDfn9W04IeYuEgFhPbEMU1X07J32SmVnT0',
         {
           method: 'POST',
           body: JSON.stringify({
@@ -53,9 +47,6 @@ const LoginMessage = () => {
         </span>
       </div>
       <div className={classes.button}>
-        <button onClick={logoutHandler} className={classes.logout}>
-          Logout
-        </button>
         <button onClick={verifyEmailHandler} className={classes.logout}>
           Verify Email
         </button>
