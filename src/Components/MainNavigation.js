@@ -1,23 +1,63 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { NavLink } from 'react-router-dom';
 
 import classes from './MainNavigation.module.css';
-import { Link } from 'react-router-dom';
+import loginContext from '../Store/LoginContext';
+
 const MainNavigation = () => {
+  const loginCtx = useContext(loginContext);
+
+  const logoutHandler = () => {
+    if(loginCtx.isLoggedIn) {
+      loginCtx.logout();
+    }
+  }
+
   return (
     <div className={classes.mainNav}>
       <nav>
         <ul>
           <li>
-          <Link to='/home'>Home</Link>
+            <NavLink
+              to='/home'
+              className={({ isActive }) => (isActive ? classes.active : '')}
+            >
+              Home
+            </NavLink>
           </li>
           <li>
-          <Link to='/product'>Products</Link>
+            <NavLink
+              to='/product'
+              className={({ isActive }) => (isActive ? classes.active : '')}
+            >
+              Products
+            </NavLink>
           </li>
           <li>
-          <Link to='/about'>About Us</Link>
+            <NavLink
+              to='/about'
+              className={({ isActive }) => (isActive ? classes.active : '')}
+            >
+              About Us
+            </NavLink>
+          </li>
+
+          <li>
+            <NavLink
+              to='/profile'
+              className={({ isActive }) => (isActive ? classes.active : '')}
+            >
+              User Profile
+            </NavLink>
           </li>
           <li>
-            <Link to='/login'>Login</Link>
+            <NavLink
+              to='/login'
+              onClick={logoutHandler}
+              className={({ isActive }) => (isActive ? classes.active : '')}
+            >
+              {!loginCtx.isLoggedIn ? 'Login' : 'Logout'}
+            </NavLink>
           </li>
         </ul>
       </nav>
