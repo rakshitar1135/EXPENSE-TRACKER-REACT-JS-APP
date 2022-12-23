@@ -23,10 +23,10 @@ const Login = () => {
 
   if (haveAccount) {
     url =
-      'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds';
+      'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDfn9W04IeYuEgFhPbEMU1X07J32SmVnT0';
   } else {
     url =
-      'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds';
+      'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDfn9W04IeYuEgFhPbEMU1X07J32SmVnT0';
   }
 
   const loginFormHandler = async (event) => {
@@ -53,7 +53,7 @@ const Login = () => {
 
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem('idToken', data.idToken);
+        localStorage.setItem('idToken', JSON.stringify(data));
         setHaveAccount(true);
         loginCtx.login();
       } else {
