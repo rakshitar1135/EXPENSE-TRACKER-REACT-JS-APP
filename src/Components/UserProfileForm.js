@@ -14,7 +14,7 @@ const UserProfileForm = () => {
     event.preventDefault();
     try {
       const res = await fetch(
-        'https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds',
+        'https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDfn9W04IeYuEgFhPbEMU1X07J32SmVnT0',
         {
           method: 'POST',
           body: JSON.stringify({
@@ -47,37 +47,38 @@ const UserProfileForm = () => {
   };
 
   // fetching profile when refreshed
-  const updateProfile = async () => {
-    try {
-      const res = await fetch(
-        'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            idToken: JSON.parse(localStorage.getItem('idToken')).idToken,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      const data = await res.json();
-      if (res.ok && data.users[0].displayName && data.users[0].photoUrl) {
-        setProfile({
-          name: data.users[0].displayName,
-          photoUrl: data.users[0].photoUrl,
-        });
-      } else {
-        throw data.error;
-      }
-    } catch (err) {
-      console.log(err.message);
-    }
-  };
-
   useEffect(() => {
+    const updateProfile = async () => {
+      try {
+        const res = await fetch(
+          'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDfn9W04IeYuEgFhPbEMU1X07J32SmVnT0',
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              idToken: JSON.parse(localStorage.getItem('idToken')).idToken,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        const data = await res.json();
+        if (res.ok && data.users[0].displayName && data.users[0].photoUrl) {
+          setProfile({
+            name: data.users[0].displayName,
+            photoUrl: data.users[0].photoUrl,
+          });
+        } else {
+          throw data.error;
+        }
+      } catch (err) {
+        console.log(err.message);
+      }
+    };
+
     updateProfile();
+
   }, []);
 
   useEffect(() => {

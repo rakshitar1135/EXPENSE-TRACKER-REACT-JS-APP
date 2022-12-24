@@ -13,7 +13,7 @@ const LoginMessage = () => {
           method: 'POST',
           body: JSON.stringify({
             requestType: 'VERIFY_EMAIL',
-            idToken: localStorage.getItem('idToken'),
+            idToken: JSON.parse(localStorage.getItem('idToken')).idToken,
           }),
           headers: {
             'Content-Type': 'application/json',

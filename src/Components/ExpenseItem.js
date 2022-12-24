@@ -2,8 +2,6 @@ import React from 'react';
 
 import classes from './ExpenseItem.module.css';
 
-
-
 const ExpenseItems = (props) => {
 
   const editHandler = async() => {
@@ -30,7 +28,7 @@ const ExpenseItems = (props) => {
 
       if(res.ok) {
         // console.log('deleted successfully');
-        props.deleted(props.item.id)
+        props.deleted(props.item)
       }
     }
     catch(err) {

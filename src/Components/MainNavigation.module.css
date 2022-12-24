@@ -39,3 +39,7 @@
   margin-right: 30px;
   margin-top: -3px;
 }
+
+.button button:active {
+  transform: scale(0.95);
+}

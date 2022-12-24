@@ -1,24 +1,22 @@
-import React, { useRef, useEffect } from 'react';
+
+
+import React, { useRef, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import classes from './Expenses.module.css';
-import ExpenseItems from '../Components/ExpenseItem'
+import ExpenseItems from '../Components/ExpenseItem';
 import { expenseAction } from '../Store/expenseSlice';
+import { themeActions } from '../Store/themeSlice';
 
 const Expenses = () => {
-
-  useEffect(() => {
-    console.log('entered');
-  },[])
-
-
-
+  const [activatePremium, setActivatePremium] = useState(false);
   const amountRef = useRef();
   const typeRef = useRef();
   const descriptionRef = useRef();
   const dispatch = useDispatch();
   const expenseList = useSelector((state) => state.expense.expenses);
-  // console.log(expenseList);
+  const totalAmount = useSelector((state) => state.expense.totalAmount);
+  const themeMode = useSelector((state) => state.theme.theme);
 
   const email = JSON.parse(localStorage.getItem('idToken')).email;
   const emailUrl = email.replace(/[@.]/g, '');
@@ -51,7 +49,12 @@ const Expenses = () => {
           type: typeRef.current.value,
           description: descriptionRef.current.value,
         };
-        dispatch(expenseAction.addExpense([newData]));
+        dispatch(
+          expenseAction.addExpense({
+            expenses: [newData],
+            totalAmount: newData.amount,
+          })
+        );
         amountRef.current.value = '';
         typeRef.current.value = '';
         descriptionRef.current.value = '';
@@ -74,12 +77,19 @@ const Expenses = () => {
 
           const data = await res.json();
           if (res.ok) {
-            const retrievedData = [];
+            let retrievedData = [];
+            let totalAmount = 0;
 
             for (let key in data) {
               retrievedData.push({ id: key, ...data[key] });
+              totalAmount = Number(totalAmount) + Number(data[key].amount);
             }
-            dispatch(expenseAction.addExpense(retrievedData));
+            dispatch(
+              expenseAction.addExpense({
+                expenses: retrievedData,
+                totalAmount: totalAmount,
+              })
+            );
           } else {
             throw data.error;
           }
@@ -91,9 +101,9 @@ const Expenses = () => {
     getItems();
   }, [emailUrl, dispatch, expenseList.length]);
 
-
   // editing the expense
   const edit = (item) => {
+    const updatedAmount = totalAmount - Number(item.amount);
     const updatedExpense = expenseList.filter(
       (expense) => expense.id !== item.id
     );
@@ -101,13 +111,26 @@ const Expenses = () => {
     typeRef.current.value = item.type;
     descriptionRef.current.value = item.description;
 
-    dispatch(expenseAction.removeExpense(updatedExpense));
+    dispatch(
+      expenseAction.removeExpense({
+        expenses: updatedExpense,
+        totalAmount: updatedAmount,
+      })
+    );
   };
 
   // deleting the expense
-  const deleted = (id) => {
-    const updatedExpense = expenseList.filter((expense) => expense.id !== id);
-    dispatch(expenseAction.removeExpense(updatedExpense));
+  const deleted = (item) => {
+    const updatedAmount = totalAmount - Number(item.amount);
+    const updatedExpense = expenseList.filter(
+      (expense) => expense.id !== item.id
+    );
+    dispatch(
+      expenseAction.removeExpense({
+        expenses: updatedExpense,
+        totalAmount: updatedAmount,
+      })
+    );
   };
 
   // mapping the expenses
@@ -121,27 +144,77 @@ const Expenses = () => {
     />
   ));
 
+  // activating premium membership
+  const activatePremiumHandler = () => {
+    setActivatePremium((preState) => {
+      if (preState) {
+        dispatch(themeActions.light());
+        return !preState;
+      } else {
+        dispatch(themeActions.dark());
+        return !preState;
+      }
+    });
+  };
+
+  // creating the csv file to download
+  const title = ['Category', 'Amount', 'Description'];
+  const data = [title];
+
+  expenseList.forEach((item) => {
+    data.push([item.type, item.amount, item.description]);
+  });
+
+  const creatingCSV = data.map((row) => row.join(',')).join('\n');
+  const blob = new Blob([creatingCSV]);
+
+  // dark mode handler
+  const darkModeHandler = () => {
+    if (themeMode === 'light') {
+      dispatch(themeActions.dark());
+    } else {
+      dispatch(themeActions.light());
+    }
+  };
+
+  if (totalAmount < 10000 && themeMode === 'dark') {
+    setActivatePremium(false);
+    dispatch(themeActions.light());
+  }
+
   // returning the component
   return (
     <React.Fragment>
+      {totalAmount > 10000 && (
+        <div className={classes.activate}>
+          <button onClick={activatePremiumHandler}>
+            {activatePremium ? 'Deactivate Premium' : 'Activate Premium'}
+          </button>
+          {activatePremium && (
+            <button onClick={darkModeHandler}>
+              {themeMode === 'light' ? 'Dark Mode' : 'Light Mode'}
+            </button>
+          )}
+        </div>
+      )}
       <form className={classes.form} onSubmit={addExpenseHandler}>
         <div className={classes.type}>
-          <label>Expense Type: </label>
-          <select ref={typeRef}>
+          <label>Expense Category: </label>
+          <select ref={typeRef} required>
             <option>Food</option>
             <option>Shopping</option>
             <option>Entertainment</option>
-            <option>Tour</option>
+            <option>Transport</option>
             <option>Adventure</option>
           </select>
         </div>
         <div className={classes.amount}>
           <label>Expense Amount: </label>
-          <input type='number' min='0' step='10' ref={amountRef} />
+          <input type='number' min='0' step='10' ref={amountRef} required />
         </div>
         <div className={classes.description}>
           <label>Expense Description: </label>
-          <textarea type='text' ref={descriptionRef} />
+          <textarea type='text' ref={descriptionRef} required />
         </div>
         <div className={classes.button}>
           <button type='submit'>Add Expense</button>
@@ -153,8 +226,14 @@ const Expenses = () => {
             <span className={classes.titletype}>Type</span>
             <span className={classes.titleamount}>Amount</span>
             <span className={classes.titledescription}>Description</span>
+            {totalAmount > 10000 && activatePremium && (
+              <a href={URL.createObjectURL(blob)} download='expenses.csv'>
+                Download
+              </a>
+            )}
           </div>
           {newExpenseList}
+          <div className={classes.total}>Total Expense = Rs.{totalAmount}</div>
         </div>
       )}
     </React.Fragment>
