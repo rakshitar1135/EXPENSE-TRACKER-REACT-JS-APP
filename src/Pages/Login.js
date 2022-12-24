@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import classes from './Login.module.css';
-import LoginMessage from '../Components/LoginMessage'
+import LoginMessage from '../Components/LoginMessage';
 import { loginActions } from '../Store/loginSlice';
 
 const Login = () => {
@@ -56,7 +56,7 @@ const Login = () => {
         const data = await res.json();
         localStorage.setItem('idToken', JSON.stringify(data));
         setHaveAccount(true);
-        dispatch(loginActions.login());
+        dispatch(loginActions.login(data.email));
       } else {
         const data = await res.json();
         throw data.error;

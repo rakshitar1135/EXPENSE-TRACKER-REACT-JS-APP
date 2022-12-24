@@ -4,15 +4,19 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import classes from './MainNavigation.module.css';
 import { loginActions } from '../Store/loginSlice';
+import { themeActions } from '../Store/themeSlice';
+import { expenseAction } from '../Store/expenseSlice';
 
 const MainNavigation = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
 
-
   const logoutHandler = () => {
     dispatch(loginActions.logout());
+    dispatch(themeActions.light());
+    dispatch(themeActions.premium(false));
+    dispatch(expenseAction.firstTime(true));
     navigate('/login');
   };
 

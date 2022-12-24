@@ -9,10 +9,11 @@ const ExpenseItems = (props) => {
       const res = await fetch(`https://expense-db213-default-rtdb.firebaseio.com//${props.emailUrl}expenses/${props.item.id}.json`,{
         method: 'DELETE'
       })
-
+      const data = await res.json();
       if(res.ok) {
-        // console.log('deleted successfully');
         props.edit(props.item)
+      } else {
+        throw data.error;
       }
     }
     catch(err) {
@@ -25,10 +26,11 @@ const ExpenseItems = (props) => {
       const res = await fetch(`https://expense-db213-default-rtdb.firebaseio.com//${props.emailUrl}expenses/${props.item.id}.json`,{
         method: 'DELETE'
       })
-
+      const data = await res.json();
       if(res.ok) {
-        // console.log('deleted successfully');
         props.deleted(props.item)
+      } else {
+        throw data.error;
       }
     }
     catch(err) {

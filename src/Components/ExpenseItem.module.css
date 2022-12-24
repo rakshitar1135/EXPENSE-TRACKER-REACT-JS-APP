@@ -9,12 +9,13 @@
 }
 
 .item .description {
-  flex-basis: 40%;
+  flex-basis: 35%;
 }
 
 .button {
-  flex-basis: 20%;
+  flex-basis: 25%;
   align-items: center;
+  text-align: center;
 }
 
 .button button {

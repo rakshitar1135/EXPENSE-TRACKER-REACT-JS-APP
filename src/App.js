@@ -14,7 +14,7 @@ import ForgotPassword from './Components/ForgotPassword';
 
 function App() {
   const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
-  const themeMode = useSelector(state => state.theme.theme);
+  const themeMode = useSelector((state) => state.theme.theme);
 
   return (
     <div className={themeMode === 'dark' ? 'dark' : ''}>
@@ -25,9 +25,7 @@ function App() {
 
         <Route
           path='/expenses'
-          element={
-            isLoggedIn ? <Expenses /> : <Navigate to='/login' replace />
-          }
+          element={isLoggedIn ? <Expenses /> : <Navigate to='/login' replace />}
         />
 
         <Route path='/about' element={<About />} />

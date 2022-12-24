@@ -1,105 +1,51 @@
-
-
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import classes from './Expenses.module.css';
 import ExpenseItems from '../Components/ExpenseItem';
 import { expenseAction } from '../Store/expenseSlice';
-import { themeActions } from '../Store/themeSlice';
+import { addingExpense } from '../Store/expenseAction';
+import { requestingExpense } from '../Store/expenseAction';
+import Premium from '../Components/Premium';
 
 const Expenses = () => {
-  const [activatePremium, setActivatePremium] = useState(false);
   const amountRef = useRef();
   const typeRef = useRef();
   const descriptionRef = useRef();
   const dispatch = useDispatch();
+  const firstTime = useSelector((state) => state.expense.firstTime);
   const expenseList = useSelector((state) => state.expense.expenses);
   const totalAmount = useSelector((state) => state.expense.totalAmount);
-  const themeMode = useSelector((state) => state.theme.theme);
 
   const email = JSON.parse(localStorage.getItem('idToken')).email;
   const emailUrl = email.replace(/[@.]/g, '');
 
   // adding new expenses
+  const removeInputData = () => {
+    amountRef.current.value = '';
+    typeRef.current.value = '';
+    descriptionRef.current.value = '';
+  };
+
   const addExpenseHandler = async (event) => {
     event.preventDefault();
 
-    try {
-      const res = await fetch(
-        `https://expense-db213-default-rtdb.firebaseio.com//${emailUrl}expenses.json`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            amount: amountRef.current.value,
-            type: typeRef.current.value,
-            description: descriptionRef.current.value,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+    const inputData = {
+      amount: amountRef.current.value,
+      type: typeRef.current.value,
+      description: descriptionRef.current.value,
+    };
 
-      const data = await res.json();
-      if (res.ok) {
-        const newData = {
-          id: data.name,
-          amount: amountRef.current.value,
-          type: typeRef.current.value,
-          description: descriptionRef.current.value,
-        };
-        dispatch(
-          expenseAction.addExpense({
-            expenses: [newData],
-            totalAmount: newData.amount,
-          })
-        );
-        amountRef.current.value = '';
-        typeRef.current.value = '';
-        descriptionRef.current.value = '';
-      } else {
-        throw data.error;
-      }
-    } catch (err) {
-      console.log(err.message);
-    }
+    dispatch(addingExpense(inputData, emailUrl, removeInputData));
   };
 
   // showing expenses when page is refreshed
   useEffect(() => {
-    const getItems = async () => {
-      if (expenseList.length === 0) {
-        try {
-          const res = await fetch(
-            `https://expense-db213-default-rtdb.firebaseio.com//${emailUrl}expenses.json`
-          );
-
-          const data = await res.json();
-          if (res.ok) {
-            let retrievedData = [];
-            let totalAmount = 0;
-
-            for (let key in data) {
-              retrievedData.push({ id: key, ...data[key] });
-              totalAmount = Number(totalAmount) + Number(data[key].amount);
-            }
-            dispatch(
-              expenseAction.addExpense({
-                expenses: retrievedData,
-                totalAmount: totalAmount,
-              })
-            );
-          } else {
-            throw data.error;
-          }
-        } catch (err) {
-          console.log(err.message);
-        }
-      }
-    };
-    getItems();
-  }, [emailUrl, dispatch, expenseList.length]);
+    if (firstTime) {
+      dispatch(requestingExpense(emailUrl));
+      console.log(emailUrl);
+    }
+  }, [emailUrl, dispatch, firstTime]);
 
   // editing the expense
   const edit = (item) => {
@@ -144,59 +90,10 @@ const Expenses = () => {
     />
   ));
 
-  // activating premium membership
-  const activatePremiumHandler = () => {
-    setActivatePremium((preState) => {
-      if (preState) {
-        dispatch(themeActions.light());
-        return !preState;
-      } else {
-        dispatch(themeActions.dark());
-        return !preState;
-      }
-    });
-  };
-
-  // creating the csv file to download
-  const title = ['Category', 'Amount', 'Description'];
-  const data = [title];
-
-  expenseList.forEach((item) => {
-    data.push([item.type, item.amount, item.description]);
-  });
-
-  const creatingCSV = data.map((row) => row.join(',')).join('\n');
-  const blob = new Blob([creatingCSV]);
-
-  // dark mode handler
-  const darkModeHandler = () => {
-    if (themeMode === 'light') {
-      dispatch(themeActions.dark());
-    } else {
-      dispatch(themeActions.light());
-    }
-  };
-
-  if (totalAmount < 10000 && themeMode === 'dark') {
-    setActivatePremium(false);
-    dispatch(themeActions.light());
-  }
-
-  // returning the component
+  // Expense Component
   return (
     <React.Fragment>
-      {totalAmount > 10000 && (
-        <div className={classes.activate}>
-          <button onClick={activatePremiumHandler}>
-            {activatePremium ? 'Deactivate Premium' : 'Activate Premium'}
-          </button>
-          {activatePremium && (
-            <button onClick={darkModeHandler}>
-              {themeMode === 'light' ? 'Dark Mode' : 'Light Mode'}
-            </button>
-          )}
-        </div>
-      )}
+      <Premium />
       <form className={classes.form} onSubmit={addExpenseHandler}>
         <div className={classes.type}>
           <label>Expense Category: </label>
@@ -210,7 +107,7 @@ const Expenses = () => {
         </div>
         <div className={classes.amount}>
           <label>Expense Amount: </label>
-          <input type='number' min='0' step='10' ref={amountRef} required />
+          <input type='number' min='0' ref={amountRef} required />
         </div>
         <div className={classes.description}>
           <label>Expense Description: </label>
@@ -226,14 +123,9 @@ const Expenses = () => {
             <span className={classes.titletype}>Type</span>
             <span className={classes.titleamount}>Amount</span>
             <span className={classes.titledescription}>Description</span>
-            {totalAmount > 10000 && activatePremium && (
-              <a href={URL.createObjectURL(blob)} download='expenses.csv'>
-                Download
-              </a>
-            )}
+            <span className={classes.total}>Total = Rs.{totalAmount}</span>
           </div>
           {newExpenseList}
-          <div className={classes.total}>Total Expense = Rs.{totalAmount}</div>
         </div>
       )}
     </React.Fragment>

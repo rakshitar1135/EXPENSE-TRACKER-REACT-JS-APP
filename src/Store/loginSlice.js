@@ -7,11 +7,12 @@ const loginSlice = createSlice({
   name: 'login',
   initialState: initialState,
   reducers: {
-    login(state) {
+    login(state, action) {
       state.isLoggedIn = true;
     },
     logout(state) {
       state.isLoggedIn = false;
+      localStorage.removeItem('idToken');
     },
   },
 });
