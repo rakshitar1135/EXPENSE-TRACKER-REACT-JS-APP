@@ -1,25 +1,19 @@
 import React from 'react';
-import { useContext } from 'react';
 
-import { Routes, Route,Navigate} from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import {useSelector} from 'react-redux';
 
 import './App.css';
 import MainNavigation from './Components/MainNavigation';
-import Login from './Pages/Login';
-import Home from './Pages/Home';
-import UserProfile from './Pages/UserProfile';
-import loginContext from './Store/LoginContext';
+import Login from './Pages/Login'
+import Home from './Pages/Home'
+import UserProfile from './Pages/UserProfile'
 import About from './Pages/About'
 import Expenses from './Pages/Expenses';
-import { ProfileContextProvider } from './Store/ProfileContext';
-
-import ForgotPassword from './Components/ForgotPassword';
-
-
-
+import ForgotPassword from'./Components/ForgotPassword';
 
 function App() {
-  const loginCtx = useContext(loginContext);
+  const isLoggedIn = useSelector(state => state.login.isLoggedIn);
 
   return (
     <React.Fragment>
@@ -28,7 +22,7 @@ function App() {
         <Route path='/' exact element={<Navigate replace to='/home' />} />
         <Route path='/home' element={<Home />} />
 
-        {loginCtx.isLoggedIn ? (
+        {isLoggedIn ? (
           <Route path='/expenses' element={<Expenses />} />
         ) : (
           <Route path='/expenses' element={<Navigate replace to='/login' />} />
@@ -36,15 +30,8 @@ function App() {
 
         <Route path='/about' element={<About />} />
 
-        {loginCtx.isLoggedIn ? (
-          <Route
-            path='/profile'
-            element={
-              <ProfileContextProvider>
-                <UserProfile />
-              </ProfileContextProvider>
-            }
-          />
+        {isLoggedIn ? (
+          <Route path='/profile' element={<UserProfile />} />
         ) : (
           <Route path='/profile' element={<Navigate replace to='/login' />} />
         )}

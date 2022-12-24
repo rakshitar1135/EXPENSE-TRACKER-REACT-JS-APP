@@ -1,17 +1,18 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
 import classes from './Login.module.css';
-import loginContext from '../Store/LoginContext';
-import LoginMessage from '../Components/LoginMessage';
-
+import LoginMessage from '../Components/LoginMessage'
+import { loginActions } from '../Store/loginSlice';
 
 const Login = () => {
   const [haveAccount, setHaveAccount] = useState(true);
   const emailRef = useRef();
   const passwordRef = useRef();
   const confirmPasswordRef = useRef();
-  const loginCtx = useContext(loginContext);
+  const dispatch = useDispatch();
+  const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
 
   const accountHandler = () => {
     setHaveAccount((preState) => {
@@ -55,7 +56,7 @@ const Login = () => {
         const data = await res.json();
         localStorage.setItem('idToken', JSON.stringify(data));
         setHaveAccount(true);
-        loginCtx.login();
+        dispatch(loginActions.login());
       } else {
         const data = await res.json();
         throw data.error;
@@ -65,8 +66,8 @@ const Login = () => {
     }
   };
 
-  if (loginCtx.isLoggedIn) {
-    return <LoginMessage />
+  if (isLoggedIn) {
+    return <LoginMessage />;
   }
 
   return (

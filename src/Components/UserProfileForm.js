@@ -1,24 +1,24 @@
-import React, { useRef, useContext, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import classes from './UserProfileForm.module.css';
-import profileContext from '../Store/ProfileContext';
 
 const UserProfileForm = () => {
-  const profileCtx = useContext(profileContext);
+  const [profile, setProfile] = useState({ name: '', photoUrl: '' });
   const nameRef = useRef();
   const photoRef = useRef();
   const naviagte = useNavigate();
 
+  // adding profile
   const profileSubmitHandler = async (event) => {
     event.preventDefault();
     try {
       const res = await fetch(
-        'https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDfn9W04IeYuEgFhPbEMU1X07J32SmVnT0',
+        'https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds',
         {
           method: 'POST',
           body: JSON.stringify({
-            idToken: localStorage.getItem('idToken'),
+            idToken: JSON.parse(localStorage.getItem('idToken')).idToken,
             displayName: nameRef.current.value,
             photoUrl: photoRef.current.value,
             returnSecureToken: true,
@@ -30,10 +30,44 @@ const UserProfileForm = () => {
       );
 
       const data = await res.json();
+      console.log(data);
 
       if (res.ok) {
         naviagte('/home');
-        profileCtx.update();
+        setProfile({
+          name: data.displayName,
+          photoUrl: data.photoUrl,
+        });
+      } else {
+        throw data.error;
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
+  // fetching profile when refreshed
+  const updateProfile = async () => {
+    try {
+      const res = await fetch(
+        'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDnI8lyfaeVbXRvOMiQ0Ip1njunluOmGds',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            idToken: JSON.parse(localStorage.getItem('idToken')).idToken,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const data = await res.json();
+      if (res.ok && data.users[0].displayName && data.users[0].photoUrl) {
+        setProfile({
+          name: data.users[0].displayName,
+          photoUrl: data.users[0].photoUrl,
+        });
       } else {
         throw data.error;
       }
@@ -43,9 +77,13 @@ const UserProfileForm = () => {
   };
 
   useEffect(() => {
-    nameRef.current.value = profileCtx.name;
-    photoRef.current.value = profileCtx.photo;
-  })
+    updateProfile();
+  }, []);
+
+  useEffect(() => {
+    nameRef.current.value = profile.name;
+    photoRef.current.value = profile.photoUrl;
+  });
 
   return (
     <form className={classes.form} onSubmit={profileSubmitHandler}>
